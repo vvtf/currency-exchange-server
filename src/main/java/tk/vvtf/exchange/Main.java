@@ -1,11 +1,13 @@
 package tk.vvtf.exchange;
 
-import java.util.Arrays;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+@SpringBootApplication
 public class Main {
 
     public static void main(String... args) {
-        System.out.println(Arrays.toString(args));
+        SpringApplication.run(Main.class, args);
     }
 
 }
