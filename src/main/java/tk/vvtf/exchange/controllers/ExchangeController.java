@@ -7,7 +7,6 @@ import tk.vvtf.exchange.entity.ExchangeDatabase;
 import tk.vvtf.exchange.entity.ExchangeRequest;
 import tk.vvtf.exchange.entity.ExchangeResult;
 
-import java.util.ArrayList;
 import java.util.Currency;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,21 +19,26 @@ public class ExchangeController {
 
     /**
      * Exchanges the sum to desired currency
+     *
      * @param exchangeRequest entity containing information for exchange
      * @return result with original and exchanged data
      */
     @RequestMapping("/exchange")
     public ExchangeResult exchange(@RequestBody ExchangeRequest exchangeRequest) {
-        // TODO implement exchange mechanism
-        System.out.println("Received request: " + exchangeRequest);
+        Currency originalCurrency = Currency.getInstance(exchangeRequest.originalCurrency.toUpperCase());
+        Currency targetCurrency = Currency.getInstance(exchangeRequest.targetCurrency.toUpperCase());
+
+        if (!ExchangeDatabase.supportedCurrencies.contains(originalCurrency) || !ExchangeDatabase.supportedCurrencies.contains(targetCurrency)) {
+            throw new IllegalArgumentException("Why u do dis? You used unsupported currency");
+        }
 
         return new ExchangeResult(
-                "",
-                "",
-                0.0f,
-                0.0f,
-                0.0f
-                );
+                originalCurrency.getCurrencyCode(),
+                targetCurrency.getCurrencyCode(),
+                ExchangeDatabase.exchangeRate(originalCurrency, targetCurrency),
+                exchangeRequest.sum,
+                ExchangeDatabase.exchange(originalCurrency, targetCurrency, exchangeRequest.sum)
+        );
     }
 
     /**
@@ -44,7 +48,7 @@ public class ExchangeController {
      */
     @RequestMapping("/currencies")
     public List<String> currencies() {
-        return ExchangeDatabase.getSupportedCurrencies().stream().map(Currency::getCurrencyCode).collect(Collectors.toList());
+        return ExchangeDatabase.supportedCurrencies.stream().map(Currency::getCurrencyCode).collect(Collectors.toList());
     }
 
 }
